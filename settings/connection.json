@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.swell.store/setting.json",
+  "label": "Senja connection",
+  "description": "Needed to copy testimonials into Swell and send review invites. Requires a Senja Starter plan or higher. Widgets work without it.",
+  "fields": [
+    {
+      "id": "api_key",
+      "label": "API key",
+      "type": "short_text",
+      "description": "In Senja, open Automate and copy your API key."
+    },
+    {
+      "id": "webhook_secret",
+      "label": "Webhook secret",
+      "type": "short_text",
+      "description": "Any random string. Enter the same value as the secret when you add the Swell webhook in Senja's Automate tab."
+    }
+  ]
+}

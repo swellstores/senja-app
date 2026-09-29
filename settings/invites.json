@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.swell.store/setting.json",
+  "label": "Review invites",
+  "description": "Email customers a link to your Senja form after their order is delivered. Requires the Senja connection above.",
+  "fields": [
+    {
+      "id": "enabled",
+      "label": "Send review invites",
+      "type": "boolean",
+      "ui": "toggle",
+      "default": false
+    },
+    {
+      "id": "form_id",
+      "label": "Senja form ID",
+      "type": "short_text",
+      "description": "The form customers are invited to fill in. In Senja, open the form and copy the ID from its URL."
+    },
+    {
+      "id": "delay_days",
+      "label": "Days after delivery",
+      "type": "number",
+      "min": 0,
+      "max": 90,
+      "default": 7,
+      "description": "How long to wait after an order is fully delivered before sending the invite."
+    },
+    {
+      "id": "only_opted_in",
+      "label": "Only invite customers who accept marketing emails",
+      "type": "boolean",
+      "ui": "toggle",
+      "default": false,
+      "description": "Some regions (such as the EU) treat review requests as marketing. Turn this on to invite only customers who opted in to marketing emails."
+    }
+  ]
+}

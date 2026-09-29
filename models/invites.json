@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json.swell.store/model.json",
+  "collection": "invites",
+  "description": "Senja review invites scheduled after orders are delivered",
+  "label": "Review invites",
+  "name_pattern": "{email}",
+  "fields": {
+    "order_id": {
+      "type": "objectid",
+      "required": true,
+      "unique": true
+    },
+    "order": {
+      "type": "link",
+      "model": "orders",
+      "key": "order_id"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "required": true
+    },
+    "name": {
+      "type": "string"
+    },
+    "form_id": {
+      "type": "string",
+      "description": "Senja form the customer is invited to"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["scheduled", "sent", "skipped", "failed"],
+      "default": "scheduled"
+    },
+    "date_scheduled": {
+      "type": "date",
+      "required": true,
+      "description": "When the invite is sent"
+    },
+    "date_sent": {
+      "type": "date"
+    },
+    "error": {
+      "type": "string",
+      "description": "Why Senja skipped the invite, or why sending failed"
+    }
+  },
+  "events": {
+    "types": [
+      {
+        "id": "created"
+      },
+      {
+        "id": "updated"
+      },
+      {
+        "id": "deleted"
+      }
+    ]
+  }
+}

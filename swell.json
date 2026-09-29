@@ -1,0 +1,8 @@
+{
+  "description": "Show Senja testimonials and collect reviews after orders ship",
+  "id": "senja",
+  "name": "Senja",
+  "type": "integration",
+  "version": "1.0.0",
+  "permissions": []
+}

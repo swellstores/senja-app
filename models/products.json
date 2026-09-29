@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.swell.store/model.json",
+  "collection": "products",
+  "description": "Senja widget and testimonial stats for each product",
+  "fields": {
+    "widget_id": {
+      "type": "string",
+      "label": "Senja widget ID",
+      "description": "Widget shown on this product's page. Leave empty to use the default widget from the app settings.",
+      "public": true
+    },
+    "testimonial_count": {
+      "type": "int",
+      "default": 0,
+      "public": true,
+      "description": "Approved Senja testimonials linked to this product"
+    },
+    "rating_average": {
+      "type": "float",
+      "scale": 1,
+      "public": true,
+      "description": "Average rating of approved testimonials linked to this product"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json.swell.store/model.json",
+  "collection": "syncs",
+  "description": "Runs that copy existing testimonials from Senja. A run can span several invocations; next_page is where it resumes.",
+  "label": "Testimonial syncs",
+  "fields": {
+    "status": {
+      "type": "string",
+      "enum": ["running", "completed", "failed"],
+      "default": "running"
+    },
+    "next_page": {
+      "type": "int",
+      "default": 1,
+      "description": "Senja page the run resumes from"
+    },
+    "created": {
+      "type": "int",
+      "default": 0,
+      "description": "Testimonials added to Swell"
+    },
+    "updated": {
+      "type": "int",
+      "default": 0,
+      "description": "Testimonials changed in Senja since the last copy"
+    },
+    "unchanged": {
+      "type": "int",
+      "default": 0
+    },
+    "date_started": {
+      "type": "date"
+    },
+    "date_completed": {
+      "type": "date"
+    },
+    "error": {
+      "type": "string"
+    }
+  },
+  "events": {
+    "types": [
+      {
+        "id": "created"
+      },
+      {
+        "id": "updated"
+      },
+      {
+        "id": "deleted"
+      }
+    ]
+  }
+}

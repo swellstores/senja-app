@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json.swell.store/model.json",
+  "collection": "testimonials",
+  "description": "Testimonials copied from Senja. Senja is the source of truth; records are written by the webhook and sync functions.",
+  "label": "Testimonials",
+  "name_pattern": "{customer_name}",
+  "fields": {
+    "senja_id": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "label": "Senja ID",
+      "description": "ID of the testimonial in Senja"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["text", "video"],
+      "default": "text"
+    },
+    "title": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "int",
+      "min": 0,
+      "max": 5
+    },
+    "approved": {
+      "type": "bool",
+      "default": false,
+      "description": "Only approved testimonials are readable from the storefront"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "customer_email": {
+      "type": "string",
+      "private": true
+    },
+    "customer_avatar": {
+      "type": "string",
+      "format": "url"
+    },
+    "customer_company": {
+      "type": "string"
+    },
+    "customer_tagline": {
+      "type": "string"
+    },
+    "date": {
+      "type": "date",
+      "description": "Date the testimonial was given"
+    },
+    "tags": {
+      "type": "array",
+      "value_type": "string"
+    },
+    "video_url": {
+      "type": "string",
+      "format": "url"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "format": "url"
+    },
+    "url": {
+      "type": "string",
+      "format": "url",
+      "description": "Public Senja page for the testimonial"
+    },
+    "integration": {
+      "type": "string",
+      "description": "Where Senja collected the testimonial (e.g. form, google, trustpilot)"
+    },
+    "product_id": {
+      "type": "objectid",
+      "description": "Product matched from a Senja tag equal to the product slug or SKU"
+    },
+    "product": {
+      "type": "link",
+      "model": "products",
+      "key": "product_id"
+    }
+  },
+  "public_permissions": {
+    "fields": [
+      "id",
+      "type",
+      "title",
+      "text",
+      "rating",
+      "customer_name",
+      "customer_avatar",
+      "customer_company",
+      "customer_tagline",
+      "date",
+      "tags",
+      "video_url",
+      "thumbnail_url",
+      "url",
+      "product_id"
+    ],
+    "query": {
+      "where": {
+        "approved": true
+      }
+    }
+  },
+  "events": {
+    "types": [
+      {
+        "id": "created"
+      },
+      {
+        "id": "updated"
+      },
+      {
+        "id": "deleted"
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.swell.store/setting.json",
+  "label": "Widget display",
+  "description": "Works on every Senja plan, including Free.",
+  "fields": [
+    {
+      "id": "default_widget_id",
+      "label": "Default widget ID",
+      "type": "short_text",
+      "description": "Shown on product pages that don't have their own widget. In Senja, open the widget, choose Share / Embed, and copy the ID from data-id=\"…\"."
+    }
+  ]
+}
