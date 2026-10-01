@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json.swell.store/content.json",
+  "collection": "syncs",
+  "label": "Testimonial syncs",
+  "description": "The app checks Senja for new testimonials every 10 minutes, and runs a full sync once a day that also removes testimonials deleted in Senja. The first full sync starts within 10 minutes of adding an API key.",
+  "fields": [
+    {
+      "id": "status",
+      "label": "Status",
+      "type": "select",
+      "readonly": true,
+      "options": [
+        {
+          "label": "Running",
+          "value": "running"
+        },
+        {
+          "label": "Completed",
+          "value": "completed"
+        },
+        {
+          "label": "Failed",
+          "value": "failed"
+        }
+      ]
+    },
+    {
+      "id": "date_started",
+      "label": "Started",
+      "type": "datetime",
+      "readonly": true
+    },
+    {
+      "id": "date_completed",
+      "label": "Finished",
+      "type": "datetime",
+      "readonly": true
+    },
+    {
+      "id": "created",
+      "label": "Added",
+      "type": "integer",
+      "readonly": true
+    },
+    {
+      "id": "updated",
+      "label": "Updated",
+      "type": "integer",
+      "readonly": true
+    },
+    {
+      "id": "unchanged",
+      "label": "Unchanged",
+      "type": "integer",
+      "readonly": true
+    },
+    {
+      "id": "error",
+      "label": "Error",
+      "type": "long_text",
+      "readonly": true
+    }
+  ],
+  "views": [
+    {
+      "id": "list",
+      "nav": {
+        "parent": "reporting",
+        "label": "Testimonial syncs"
+      },
+      "sort": {
+        "date_started": "desc"
+      },
+      "fields": [
+        {
+          "id": "date_started"
+        },
+        {
+          "id": "status"
+        },
+        {
+          "id": "created"
+        },
+        {
+          "id": "updated"
+        },
+        {
+          "id": "date_completed"
+        },
+        {
+          "id": "error",
+          "truncated": 60
+        }
+      ],
+      "actions": []
+    },
+    {
+      "id": "edit",
+      "title": "Sync started {{ date_started | date: '%b %d, %Y %H:%M' }}",
+      "fields": [
+        {
+          "type": "field_row",
+          "fields": [
+            {
+              "id": "status",
+              "admin_span": 2,
+              "readonly": true
+            },
+            {
+              "id": "date_started",
+              "admin_span": 1,
+              "readonly": true
+            },
+            {
+              "id": "date_completed",
+              "admin_span": 1,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "type": "field_row",
+          "fields": [
+            {
+              "id": "created",
+              "admin_span": 1,
+              "readonly": true
+            },
+            {
+              "id": "updated",
+              "admin_span": 1,
+              "readonly": true
+            },
+            {
+              "id": "unchanged",
+              "admin_span": 1,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "id": "error",
+          "readonly": true
+        }
+      ]
+    },
+    {
+      "id": "new",
+      "title": "Syncs run automatically",
+      "fields": [
+        {
+          "id": "status",
+          "readonly": true,
+          "label": "How this works",
+          "description": "The app checks Senja every 10 minutes and runs a full sync once a day. There's nothing to start by hand."
+        }
+      ]
+    }
+  ]
+}

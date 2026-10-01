@@ -7,13 +7,7 @@
       "id": "api_key",
       "label": "API key",
       "type": "short_text",
-      "description": "In Senja, open Automate and copy your API key."
-    },
-    {
-      "id": "webhook_secret",
-      "label": "Webhook secret",
-      "type": "short_text",
-      "description": "Any random string. Enter the same value as the secret when you add the Swell webhook in Senja's Automate tab."
+      "description": "From Senja: Automate → API key."
     }
   ]
 }

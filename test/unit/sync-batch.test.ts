@@ -58,8 +58,8 @@ describe('syncTestimonialBatch', () => {
   it('looks up products and existing copies once per page, and links by slug or SKU', async () => {
     const swell = swellWith({
       products: [
-        { id: 'p1', slug: 'blue-sneaker', sku: 'SKU-1' },
-        { id: 'p2', slug: 'red-hat', sku: 'SKU-2' },
+        { id: 'p1', name: 'Blue Sneaker', slug: 'blue-sneaker', sku: 'SKU-1' },
+        { id: 'p2', name: 'Red Hat', slug: 'red-hat', sku: 'SKU-2' },
       ],
     });
 
@@ -70,11 +70,11 @@ describe('syncTestimonialBatch', () => {
     ]);
 
     expect(swell.get).toHaveBeenCalledTimes(2);
-    const posted = swell.post.mock.calls.map(([, record]) => [record.senja_id, record.product_id]);
+    const posted = swell.post.mock.calls.map(([, record]) => [record.senja_id, record.product_id, record.product_name]);
     expect(posted).toEqual([
-      ['s1', 'p1'],
-      ['s2', 'p2'],
-      ['s3', null],
+      ['s1', 'p1', 'Blue Sneaker'],
+      ['s2', 'p2', 'Red Hat'],
+      ['s3', null, null],
     ]);
   });
 });

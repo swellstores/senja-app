@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.swell.store/setting.json",
+  "label": "Sync status",
+  "description": "Updated automatically every 10 minutes. Full history is in Reporting → Testimonial syncs.",
+  "fields": [
+    {
+      "id": "last_checked",
+      "label": "Last checked",
+      "type": "date",
+      "readonly": true
+    },
+    {
+      "id": "message",
+      "label": "Status",
+      "type": "short_text",
+      "readonly": true
+    }
+  ]
+}

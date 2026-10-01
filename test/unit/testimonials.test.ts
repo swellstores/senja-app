@@ -1,9 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
-  deleteTestimonial,
-  findProductIdForTags,
+  CLEANUP_PAGE_SIZE,
+  removeMissingTestimonials,
   toTestimonialRecord,
-  upsertTestimonial,
   type SenjaTestimonial,
 } from '../../functions/lib/testimonials';
 
@@ -19,16 +18,6 @@ const senjaTestimonial: SenjaTestimonial = {
   customer_email: 'ada@example.com',
   tags: ['blue-sneaker'],
 };
-
-function swellMock(overrides: Partial<Record<'get' | 'post' | 'put' | 'delete', ReturnType<typeof vi.fn>>> = {}) {
-  return {
-    get: vi.fn().mockResolvedValue({ results: [] }),
-    post: vi.fn().mockResolvedValue({ id: 'swell_new' }),
-    put: vi.fn().mockResolvedValue({}),
-    delete: vi.fn().mockResolvedValue({}),
-    ...overrides,
-  } as unknown as SwellAPI & Record<'get' | 'post' | 'put' | 'delete', ReturnType<typeof vi.fn>>;
-}
 
 describe('toTestimonialRecord', () => {
   it('maps Senja fields onto the Swell record', () => {
@@ -56,66 +45,42 @@ describe('toTestimonialRecord', () => {
   });
 });
 
-describe('findProductIdForTags', () => {
-  it('returns null without calling Swell when there are no tags', async () => {
-    const swell = swellMock();
-    expect(await findProductIdForTags(swell, [])).toBeNull();
-    expect(await findProductIdForTags(swell, undefined)).toBeNull();
-    expect(swell.get).not.toHaveBeenCalled();
+describe('removeMissingTestimonials', () => {
+  function swellWith(records: { id: string; senja_id: string }[]) {
+    return {
+      get: vi.fn().mockResolvedValue({ results: records }),
+      put: vi.fn().mockResolvedValue({}),
+      delete: vi.fn().mockResolvedValue({}),
+    } as unknown as SwellAPI & Record<'get' | 'put' | 'delete', ReturnType<typeof vi.fn>>;
+  }
+
+  it('deletes copies Senja no longer has and keeps the rest', async () => {
+    const swell = swellWith([
+      { id: 'w1', senja_id: 's1' },
+      { id: 'w2', senja_id: 'gone' },
+      { id: 'w3', senja_id: 's3' },
+    ]);
+    const result = await removeMissingTestimonials(swell, new Set(['s1', 's3']), null);
+
+    expect(result).toEqual({ removed: 1, next_after: null });
+    expect(swell.delete).toHaveBeenCalledTimes(1);
+    expect(swell.delete).toHaveBeenCalledWith('/testimonials/w2');
   });
 
-  it('looks up products by slug or SKU', async () => {
-    const swell = swellMock({ get: vi.fn().mockResolvedValue({ results: [{ id: 'prod_1' }] }) });
-    expect(await findProductIdForTags(swell, [' blue-sneaker '])).toBe('prod_1');
-    expect(swell.get).toHaveBeenCalledWith('/products', {
-      where: { $or: [{ slug: { $in: ['blue-sneaker'] } }, { sku: { $in: ['blue-sneaker'] } }] },
-      fields: 'id',
-      limit: 1,
+  it('walks the collection by id and reports where to continue', async () => {
+    const page = Array.from({ length: CLEANUP_PAGE_SIZE }, (_, i) => ({ id: `w${i}`, senja_id: `s${i}` }));
+    const swell = swellWith(page);
+    const seen = new Set(page.map((r) => r.senja_id));
+
+    expect(await removeMissingTestimonials(swell, seen, 'w_prev')).toEqual({
+      removed: 0,
+      next_after: `w${CLEANUP_PAGE_SIZE - 1}`,
     });
-  });
-});
-
-describe('upsertTestimonial', () => {
-  it('creates a record when the testimonial is new', async () => {
-    const get = vi
-      .fn()
-      .mockResolvedValueOnce({ results: [{ id: 'prod_1' }] }) // product lookup
-      .mockResolvedValueOnce({ results: [] }); // existing testimonial lookup
-    const swell = swellMock({ get });
-
-    expect(await upsertTestimonial(swell, senjaTestimonial)).toEqual({ action: 'created', id: 'swell_new' });
-    expect(swell.post).toHaveBeenCalledWith(
-      '/testimonials',
-      expect.objectContaining({ senja_id: 'senja_1', product_id: 'prod_1' }),
-    );
-  });
-
-  it('updates the existing record when the testimonial was already copied', async () => {
-    const get = vi
-      .fn()
-      .mockResolvedValueOnce({ results: [] })
-      .mockResolvedValueOnce({ results: [{ id: 'swell_1', senja_id: 'senja_1' }] });
-    const swell = swellMock({ get });
-
-    expect(await upsertTestimonial(swell, senjaTestimonial)).toEqual({ action: 'updated', id: 'swell_1' });
-    expect(swell.put).toHaveBeenCalledWith(
-      '/testimonials/swell_1',
-      expect.objectContaining({ senja_id: 'senja_1', product_id: null }),
-    );
-    expect(swell.post).not.toHaveBeenCalled();
-  });
-});
-
-describe('deleteTestimonial', () => {
-  it('deletes the Swell copy', async () => {
-    const swell = swellMock({ get: vi.fn().mockResolvedValue({ results: [{ id: 'swell_1' }] }) });
-    expect(await deleteTestimonial(swell, 'senja_1')).toEqual({ action: 'deleted', id: 'swell_1' });
-    expect(swell.delete).toHaveBeenCalledWith('/testimonials/swell_1');
-  });
-
-  it('does nothing when there is no copy', async () => {
-    const swell = swellMock();
-    expect(await deleteTestimonial(swell, 'senja_1')).toEqual({ action: 'not_found' });
-    expect(swell.delete).not.toHaveBeenCalled();
+    expect(swell.get).toHaveBeenCalledWith('/testimonials', {
+      where: { id: { $gt: 'w_prev' } },
+      fields: 'id,senja_id',
+      sort: 'id asc',
+      limit: CLEANUP_PAGE_SIZE,
+    });
   });
 });

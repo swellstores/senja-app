@@ -4,5 +4,13 @@
   "name": "Senja",
   "type": "integration",
   "version": "1.0.0",
-  "permissions": []
+  "permissions": [],
+  "images": [
+    {
+      "id": "cover",
+      "image_src": "assets/images/cover.png",
+      "title": "Senja testimonials in Swell",
+      "description": "Placeholder cover. Marketing replaces this with real screenshots."
+    }
+  ]
 }

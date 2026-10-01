@@ -6,7 +6,7 @@
     "widget_id": {
       "type": "string",
       "label": "Senja widget ID",
-      "description": "Widget shown on this product's page. Leave empty to use the default widget from the app settings.",
+      "description": "Senja widget shown on this product's page. Storefronts read it from the product and fall back to their own default widget when it's empty.",
       "public": true
     },
     "testimonial_count": {

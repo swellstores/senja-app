@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json.swell.store/content.json",
+  "collection": "products",
+  "label": "Products",
+  "fields": [
+    {
+      "id": "widget_id",
+      "label": "Senja widget ID",
+      "type": "short_text",
+      "placeholder": "Uses the store default",
+      "description": "From Senja: widget → Share / Embed. Empty uses the store default."
+    },
+    {
+      "id": "testimonial_count",
+      "label": "Approved testimonials",
+      "type": "integer",
+      "readonly": true
+    },
+    {
+      "id": "rating_average",
+      "label": "Average rating",
+      "type": "number",
+      "digits": 1,
+      "readonly": true
+    },
+    {
+      "id": "testimonials",
+      "label": "Testimonials",
+      "type": "collection",
+      "collection": "testimonials",
+      "link": {
+        "params": {
+          "product_id": "id"
+        }
+      },
+      "readonly": true,
+      "description": "Linked by a Senja tag matching the product's slug or SKU.",
+      "fields": [
+        {
+          "id": "customer_name",
+          "label": "Customer",
+          "type": "short_text"
+        },
+        {
+          "id": "rating",
+          "label": "Rating",
+          "type": "integer"
+        },
+        {
+          "id": "approved",
+          "label": "Approved",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "edit",
+      "tabs": [
+        {
+          "id": "senja",
+          "label": "Senja",
+          "fields": [
+            {
+              "id": "widget_id"
+            },
+            {
+              "type": "field_row",
+              "fields": [
+                {
+                  "id": "testimonial_count",
+                  "admin_span": 2
+                },
+                {
+                  "id": "rating_average",
+                  "admin_span": 2
+                }
+              ]
+            },
+            {
+              "id": "testimonials"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

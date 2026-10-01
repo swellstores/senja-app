@@ -28,6 +28,28 @@
       "type": "int",
       "default": 0
     },
+    "removed": {
+      "type": "int",
+      "default": 0,
+      "description": "Testimonials removed because they were deleted in Senja"
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["fetch", "cleanup"],
+      "default": "fetch",
+      "description": "fetch: copying from Senja; cleanup: removing testimonials Senja no longer has"
+    },
+    "seen_ids": {
+      "type": "array",
+      "value_type": "string",
+      "private": true,
+      "description": "Senja IDs seen during this run, used to find deleted testimonials"
+    },
+    "cleanup_after": {
+      "type": "string",
+      "private": true,
+      "description": "Last testimonial id checked during cleanup"
+    },
     "date_started": {
       "type": "date"
     },

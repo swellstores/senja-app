@@ -14,7 +14,10 @@
     },
     "type": {
       "type": "string",
-      "enum": ["text", "video"],
+      "enum": [
+        "text",
+        "video"
+      ],
       "default": "text"
     },
     "title": {
@@ -83,6 +86,15 @@
       "type": "link",
       "model": "products",
       "key": "product_id"
+    },
+    "product_name": {
+      "type": "string",
+      "description": "Linked product's name at the time of the last sync, shown in the dashboard"
+    },
+    "previous_product_id": {
+      "type": "objectid",
+      "private": true,
+      "description": "Product the testimonial was linked to before its tags changed, so that product's stats can be recalculated"
     }
   },
   "public_permissions": {
@@ -101,7 +113,8 @@
       "video_url",
       "thumbnail_url",
       "url",
-      "product_id"
+      "product_id",
+      "product_name"
     ],
     "query": {
       "where": {

@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json.swell.store/content.json",
+  "collection": "testimonials",
+  "label": "Testimonials",
+  "description": "Testimonials copied from Senja. To approve, edit or delete a testimonial, do it in Senja and the change appears here.",
+  "fields": [
+    {
+      "id": "customer_name",
+      "label": "Customer",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "customer_company",
+      "label": "Company",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "customer_tagline",
+      "label": "Tagline",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "customer_avatar",
+      "label": "Avatar URL",
+      "type": "url",
+      "readonly": true
+    },
+    {
+      "id": "rating",
+      "label": "Rating",
+      "type": "integer",
+      "min": 0,
+      "max": 5,
+      "readonly": true
+    },
+    {
+      "id": "approved",
+      "label": "Approved in Senja",
+      "type": "boolean",
+      "readonly": true
+    },
+    {
+      "id": "type",
+      "label": "Type",
+      "type": "select",
+      "readonly": true,
+      "options": [
+        {
+          "label": "Text",
+          "value": "text"
+        },
+        {
+          "label": "Video",
+          "value": "video"
+        }
+      ]
+    },
+    {
+      "id": "title",
+      "label": "Title",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "text",
+      "label": "Testimonial",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "date",
+      "label": "Date given",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "product_name",
+      "label": "Product",
+      "type": "short_text",
+      "readonly": true,
+      "description": "Linked by a Senja tag matching the product's slug or SKU."
+    },
+    {
+      "id": "tags",
+      "label": "Senja tags",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "video_url",
+      "label": "Video URL",
+      "type": "url",
+      "readonly": true
+    },
+    {
+      "id": "url",
+      "label": "Senja page",
+      "type": "url",
+      "readonly": true
+    },
+    {
+      "id": "integration",
+      "label": "Source",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "senja_id",
+      "label": "Senja ID",
+      "type": "short_text",
+      "readonly": true
+    }
+  ],
+  "views": [
+    {
+      "id": "list",
+      "nav": {
+        "parent": "products",
+        "label": "Testimonials"
+      },
+      "sort": {
+        "date": "desc"
+      },
+      "fields": [
+        {
+          "id": "customer_name"
+        },
+        {
+          "id": "rating"
+        },
+        {
+          "id": "approved",
+          "label": "Approved"
+        },
+        {
+          "id": "product_name"
+        },
+        {
+          "id": "date",
+          "label": "Date"
+        },
+        {
+          "id": "text",
+          "truncated": 40
+        }
+      ],
+      "tabs": [
+        {
+          "id": "approved",
+          "label": "Approved",
+          "query": {
+            "where": {
+              "approved": true
+            }
+          }
+        },
+        {
+          "id": "not_approved",
+          "label": "Not approved",
+          "query": {
+            "where": {
+              "approved": {
+                "$ne": true
+              }
+            }
+          }
+        }
+      ],
+      "actions": []
+    },
+    {
+      "id": "edit",
+      "title": "{{ customer_name }}",
+      "subtitle": "Managed in Senja",
+      "fields": [
+        {
+          "type": "field_row",
+          "fields": [
+            {
+              "id": "customer_name",
+              "admin_span": 2,
+              "readonly": true
+            },
+            {
+              "id": "rating",
+              "admin_span": 1,
+              "readonly": true
+            },
+            {
+              "id": "approved",
+              "admin_span": 1,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "type": "field_row",
+          "fields": [
+            {
+              "id": "customer_company",
+              "admin_span": 2,
+              "readonly": true
+            },
+            {
+              "id": "customer_tagline",
+              "admin_span": 2,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "id": "title",
+          "readonly": true
+        },
+        {
+          "id": "text",
+          "readonly": true
+        },
+        {
+          "type": "field_row",
+          "fields": [
+            {
+              "id": "product_name",
+              "admin_span": 2,
+              "readonly": true
+            },
+            {
+              "id": "date",
+              "admin_span": 2,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "id": "tags",
+          "readonly": true
+        },
+        {
+          "type": "field_group",
+          "label": "More from Senja",
+          "fields": [
+            {
+              "id": "type",
+              "readonly": true
+            },
+            {
+              "id": "video_url",
+              "readonly": true
+            },
+            {
+              "id": "customer_avatar",
+              "readonly": true
+            },
+            {
+              "id": "url",
+              "readonly": true
+            },
+            {
+              "id": "integration",
+              "readonly": true
+            },
+            {
+              "id": "senja_id",
+              "readonly": true
+            }
+          ]
+        }
+      ],
+      "actions": [],
+      "record_actions": []
+    },
+    {
+      "id": "new",
+      "title": "Testimonials come from Senja",
+      "fields": [
+        {
+          "id": "senja_id",
+          "readonly": true,
+          "label": "How this works",
+          "description": "Testimonials are added and edited in Senja and appear here automatically. There's nothing to create in Swell."
+        }
+      ]
+    }
+  ]
+}

@@ -40,6 +40,8 @@ export interface TestimonialRecord {
   url: string | null;
   integration: string | null;
   product_id: string | null;
+  /** Shown as plain text in the dashboard; the product picker can't be made read-only. */
+  product_name: string | null;
 }
 
 function clampRating(rating: number | null | undefined): number | null {
@@ -52,6 +54,7 @@ function clampRating(rating: number | null | undefined): number | null {
 export function toTestimonialRecord(
   testimonial: SenjaTestimonial,
   productId: string | null,
+  productName: string | null = null,
 ): TestimonialRecord {
   return {
     senja_id: testimonial.id,
@@ -72,62 +75,20 @@ export function toTestimonialRecord(
     url: testimonial.url ?? null,
     integration: testimonial.integration ?? null,
     product_id: productId,
+    product_name: productId ? productName : null,
   };
 }
 
-/** A testimonial is linked to the first product whose slug or SKU matches one of its Senja tags. */
-export async function findProductIdForTags(
-  swell: SwellAPI,
-  tags: string[] | null | undefined,
-): Promise<string | null> {
-  const values = (tags ?? []).map((tag) => tag.trim()).filter(Boolean);
-  if (!values.length) {
-    return null;
+/** When the linked product changes, remember the old one so its stats get recalculated too. */
+export function withPreviousProduct(
+  existing: Partial<TestimonialRecord>,
+  record: TestimonialRecord,
+): TestimonialRecord & { previous_product_id?: string | null } {
+  const previous = existing.product_id ?? null;
+  if (previous && previous !== record.product_id) {
+    return { ...record, previous_product_id: previous };
   }
-  const result = (await swell.get('/products', {
-    where: { $or: [{ slug: { $in: values } }, { sku: { $in: values } }] },
-    fields: 'id',
-    limit: 1,
-  })) as { results?: { id: string }[] } | null;
-  return result?.results?.[0]?.id ?? null;
-}
-
-async function findBySenjaId(swell: SwellAPI, senjaId: string): Promise<TestimonialRecord | null> {
-  const result = (await swell.get('/testimonials', {
-    where: { senja_id: senjaId },
-    limit: 1,
-  })) as { results?: TestimonialRecord[] } | null;
-  return result?.results?.[0] ?? null;
-}
-
-/** Create or update the Swell copy of a Senja testimonial. */
-export async function upsertTestimonial(
-  swell: SwellAPI,
-  testimonial: SenjaTestimonial,
-): Promise<{ action: 'created' | 'updated'; id: string }> {
-  const productId = await findProductIdForTags(swell, testimonial.tags);
-  const record = toTestimonialRecord(testimonial, productId);
-  const existing = await findBySenjaId(swell, testimonial.id);
-
-  if (existing?.id) {
-    await swell.put(`/testimonials/${existing.id}`, record);
-    return { action: 'updated', id: existing.id };
-  }
-  const created = (await swell.post('/testimonials', record)) as { id: string };
-  return { action: 'created', id: created.id };
-}
-
-/** Remove the Swell copy of a Senja testimonial, if there is one. */
-export async function deleteTestimonial(
-  swell: SwellAPI,
-  senjaId: string,
-): Promise<{ action: 'deleted' | 'not_found'; id?: string }> {
-  const existing = await findBySenjaId(swell, senjaId);
-  if (!existing?.id) {
-    return { action: 'not_found' };
-  }
-  await swell.delete(`/testimonials/${existing.id}`);
-  return { action: 'deleted', id: existing.id };
+  return record;
 }
 
 const SYNCED_FIELDS: (keyof TestimonialRecord)[] = [
@@ -148,6 +109,7 @@ const SYNCED_FIELDS: (keyof TestimonialRecord)[] = [
   'url',
   'integration',
   'product_id',
+  'product_name',
 ];
 
 function normalize(value: unknown): string {
@@ -164,23 +126,28 @@ export function hasChanges(existing: Partial<TestimonialRecord>, next: Testimoni
   return SYNCED_FIELDS.some((field) => normalize(existing[field]) !== normalize(next[field]));
 }
 
-/** Map every tag in the batch to a product id, using one query. */
-async function productIdsByTag(swell: SwellAPI, testimonials: SenjaTestimonial[]): Promise<Map<string, string>> {
+interface TaggedProduct {
+  id: string;
+  name: string | null;
+}
+
+/** Map every tag in the batch to a product, using one query. */
+async function productsByTag(swell: SwellAPI, testimonials: SenjaTestimonial[]): Promise<Map<string, TaggedProduct>> {
   const tags = [...new Set(testimonials.flatMap((t) => (t.tags ?? []).map((tag) => tag.trim()).filter(Boolean)))];
-  const byTag = new Map<string, string>();
+  const byTag = new Map<string, TaggedProduct>();
   if (!tags.length) {
     return byTag;
   }
   const result = (await swell.get('/products', {
     where: { $or: [{ slug: { $in: tags } }, { sku: { $in: tags } }] },
-    fields: 'id,slug,sku',
+    fields: 'id,name,slug,sku',
     limit: 1000,
-  })) as { results?: { id: string; slug?: string; sku?: string }[] } | null;
+  })) as { results?: { id: string; name?: string; slug?: string; sku?: string }[] } | null;
 
   for (const product of result?.results ?? []) {
     for (const key of [product.slug, product.sku]) {
       if (key && !byTag.has(key)) {
-        byTag.set(key, product.id);
+        byTag.set(key, { id: product.id, name: product.name ?? null });
       }
     }
   }
@@ -204,7 +171,7 @@ export async function syncTestimonialBatch(
   }
 
   const [byTag, existingResult] = await Promise.all([
-    productIdsByTag(swell, testimonials),
+    productsByTag(swell, testimonials),
     swell.get('/testimonials', {
       where: { senja_id: { $in: testimonials.map((t) => t.id) } },
       limit: testimonials.length,
@@ -213,19 +180,49 @@ export async function syncTestimonialBatch(
   const existingBySenjaId = new Map((existingResult?.results ?? []).map((r) => [r.senja_id, r]));
 
   for (const testimonial of testimonials) {
-    const productId = (testimonial.tags ?? []).map((tag) => byTag.get(tag.trim())).find(Boolean) ?? null;
-    const record = toTestimonialRecord(testimonial, productId);
+    const product = (testimonial.tags ?? []).map((tag) => byTag.get(tag.trim())).find(Boolean) ?? null;
+    const record = toTestimonialRecord(testimonial, product?.id ?? null, product?.name ?? null);
     const existing = existingBySenjaId.get(testimonial.id);
 
     if (!existing?.id) {
       await swell.post('/testimonials', record);
       counts.created++;
     } else if (hasChanges(existing, record)) {
-      await swell.put(`/testimonials/${existing.id}`, record);
+      await swell.put(`/testimonials/${existing.id}`, withPreviousProduct(existing, record));
       counts.updated++;
     } else {
       counts.unchanged++;
     }
   }
   return counts;
+}
+
+export const CLEANUP_PAGE_SIZE = 500;
+
+/**
+ * Delete Swell copies whose Senja testimonial no longer exists. Walks the collection by id so
+ * deletions don't shift later pages. Returns the id to continue after, or null when done.
+ */
+export async function removeMissingTestimonials(
+  swell: SwellAPI,
+  seenSenjaIds: Set<string>,
+  after: string | null,
+): Promise<{ removed: number; next_after: string | null }> {
+  const result = (await swell.get('/testimonials', {
+    where: after ? { id: { $gt: after } } : {},
+    fields: 'id,senja_id',
+    sort: 'id asc',
+    limit: CLEANUP_PAGE_SIZE,
+  })) as { results?: { id: string; senja_id: string }[] } | null;
+  const records = result?.results ?? [];
+
+  let removed = 0;
+  for (const record of records) {
+    if (!seenSenjaIds.has(record.senja_id)) {
+      await swell.delete(`/testimonials/${record.id}`);
+      removed++;
+    }
+  }
+  const done = records.length < CLEANUP_PAGE_SIZE;
+  return { removed, next_after: done ? null : records[records.length - 1].id };
 }

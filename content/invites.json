@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json.swell.store/content.json",
+  "collection": "invites",
+  "label": "Review invites",
+  "description": "Senja review invites the app schedules after orders are delivered. Turn invites on in the app settings.",
+  "fields": [
+    {
+      "id": "email",
+      "label": "Customer email",
+      "type": "email",
+      "readonly": true
+    },
+    {
+      "id": "name",
+      "label": "Customer name",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "order",
+      "label": "Order",
+      "type": "lookup",
+      "model": "orders",
+      "key": "order_id",
+      "readonly": true
+    },
+    {
+      "id": "status",
+      "label": "Status",
+      "type": "select",
+      "readonly": true,
+      "options": [
+        {
+          "label": "Scheduled",
+          "value": "scheduled"
+        },
+        {
+          "label": "Sent",
+          "value": "sent"
+        },
+        {
+          "label": "Skipped",
+          "value": "skipped"
+        },
+        {
+          "label": "Failed",
+          "value": "failed"
+        }
+      ]
+    },
+    {
+      "id": "date_scheduled",
+      "label": "Send date",
+      "type": "datetime",
+      "readonly": true
+    },
+    {
+      "id": "date_sent",
+      "label": "Sent",
+      "type": "datetime",
+      "readonly": true
+    },
+    {
+      "id": "form_id",
+      "label": "Senja form ID",
+      "type": "short_text",
+      "readonly": true
+    },
+    {
+      "id": "error",
+      "label": "Details",
+      "type": "long_text",
+      "readonly": true,
+      "description": "Why Senja skipped the invite, or why it failed"
+    }
+  ],
+  "views": [
+    {
+      "id": "list",
+      "nav": {
+        "parent": "orders",
+        "label": "Review invites"
+      },
+      "sort": {
+        "date_scheduled": "desc"
+      },
+      "fields": [
+        {
+          "id": "email"
+        },
+        {
+          "id": "order"
+        },
+        {
+          "id": "status"
+        },
+        {
+          "id": "date_scheduled"
+        },
+        {
+          "id": "date_sent"
+        },
+        {
+          "id": "error",
+          "truncated": 60
+        }
+      ],
+      "tabs": [
+        {
+          "id": "scheduled",
+          "label": "Scheduled",
+          "query": {
+            "where": {
+              "status": "scheduled"
+            }
+          }
+        },
+        {
+          "id": "sent",
+          "label": "Sent",
+          "query": {
+            "where": {
+              "status": "sent"
+            }
+          }
+        },
+        {
+          "id": "problems",
+          "label": "Skipped or failed",
+          "query": {
+            "where": {
+              "status": {
+                "$in": [
+                  "skipped",
+                  "failed"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "actions": []
+    },
+    {
+      "id": "edit",
+      "title": "Invite to {{ email }}",
+      "fields": [
+        {
+          "type": "field_row",
+          "fields": [
+            {
+              "id": "email",
+              "admin_span": 2,
+              "readonly": true
+            },
+            {
+              "id": "name",
+              "admin_span": 2,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "type": "field_row",
+          "fields": [
+            {
+              "id": "status",
+              "admin_span": 1,
+              "readonly": true
+            },
+            {
+              "id": "date_scheduled",
+              "admin_span": 1,
+              "readonly": true
+            },
+            {
+              "id": "date_sent",
+              "admin_span": 1,
+              "readonly": true
+            },
+            {
+              "id": "order",
+              "admin_span": 1,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "id": "error",
+          "readonly": true
+        },
+        {
+          "id": "form_id",
+          "readonly": true
+        }
+      ]
+    },
+    {
+      "id": "new",
+      "title": "Invites are created automatically",
+      "fields": [
+        {
+          "id": "email",
+          "readonly": true,
+          "label": "How this works",
+          "description": "Invites are scheduled automatically when an order is fully delivered. Turn invites on in Apps → Senja → Settings."
+        }
+      ]
+    }
+  ]
+}
