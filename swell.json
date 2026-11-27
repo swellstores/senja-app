@@ -1,5 +1,6 @@
 {
   "description": "Show Senja testimonials and collect reviews after orders ship",
+  "repository_url": "https://github.com/swellstores/senja-app",
   "id": "senja",
   "name": "Senja",
   "type": "integration",

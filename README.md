@@ -148,3 +148,7 @@ npm test
 - **Delete events:** delete events deliver the record's fields in `$event.data`, not on `req.data`. `update-product-stats` reads both.
 - **Public routes:** routes with `public: true` still require the store's secret key, which is why there's no webhook receiver. If Swell adds truly public routes, a Senja webhook (`x-senja-signature`, HMAC-SHA256 hex of the JSON body) would make updates instant.
 - **CLI validation:** `swell schema <type> <file>` currently fails on every file, so validate against `swell schema <type> --format=json-schema-bundle` with ajv instead.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
